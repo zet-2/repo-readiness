@@ -53,6 +53,23 @@ repo-readiness owner/repository
 The optional `GITHUB_TOKEN` environment variable raises the API rate limit for
 repeated checks.
 
+## GitHub API access
+
+Public repositories work without authentication. For repeated checks, provide a
+fine-grained token through the environment:
+
+```bash
+GITHUB_TOKEN=github_pat_... repo-readiness owner/repository
+```
+
+Repo Readiness sends the token only in the `Authorization` header of requests
+to `api.github.com`; it does not print or persist the value. Granting repository
+permissions is unnecessary when checking public repositories.
+
+If GitHub returns a rate-limit error, wait for the limit to reset or retry with
+`GITHUB_TOKEN` set. Private repositories require a token that can read the
+target repository.
+
 ## Development
 
 ```bash
