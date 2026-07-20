@@ -1,5 +1,6 @@
 import unittest
 
+from repo_readiness.checks import evaluate, format_checks, score
 from repo_readiness.cli import format_summary
 from repo_readiness.github import parse_repository
 
@@ -30,6 +31,27 @@ class FormatSummaryTests(unittest.TestCase):
         self.assertIn("octocat/Hello-World", summary)
         self.assertIn("state: active", summary)
         self.assertIn("stars: 10", summary)
+
+
+class ReadinessCheckTests(unittest.TestCase):
+    def test_scores_repository_hygiene(self) -> None:
+        repository = {
+            "description": "A greeting",
+            "license": {"spdx_id": "MIT"},
+            "topics": ["example"],
+            "homepage": "",
+            "has_issues": True,
+            "archived": False,
+        }
+
+        checks = evaluate(repository)
+
+        self.assertEqual(score(checks), 83)
+        self.assertIn("[ ] Repository links to a homepage", format_checks(checks))
+        self.assertIn("Add a demo", format_checks(checks))
+
+    def test_empty_check_list_has_zero_score(self) -> None:
+        self.assertEqual(score([]), 0)
 
 
 if __name__ == "__main__":

@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 from collections.abc import Sequence
 
+from repo_readiness.checks import evaluate, format_checks
 from repo_readiness.github import GitHubError, fetch_repository
 
 
@@ -39,4 +40,6 @@ def main(argv: Sequence[str] | None = None) -> int:
     except (GitHubError, ValueError) as exc:
         build_parser().error(str(exc))
     print(format_summary(repository))
+    print()
+    print(format_checks(evaluate(repository)))
     return 0
