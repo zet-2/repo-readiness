@@ -16,6 +16,16 @@ Run directly from the repository:
 PYTHONPATH=src python -m repo_readiness owner/repository
 ```
 
+For CI jobs and scripts, request JSON and enforce a minimum score:
+
+```bash
+PYTHONPATH=src python -m repo_readiness owner/repository --json
+PYTHONPATH=src python -m repo_readiness owner/repository --fail-under 80
+```
+
+`--fail-under` exits with status `1` when the score is below the requested
+threshold.
+
 Example:
 
 ```text
