@@ -1,7 +1,8 @@
+import argparse
 import unittest
 
 from repo_readiness.checks import evaluate, format_checks, score
-from repo_readiness.cli import format_summary
+from repo_readiness.cli import build_json_report, format_summary, main, percentage
 from repo_readiness.github import parse_repository
 
 
@@ -37,6 +38,10 @@ class ReadinessCheckTests(unittest.TestCase):
     def test_scores_repository_hygiene(self) -> None:
         repository = {
             "description": "A greeting",
+            "default_branch": "main",
+            "stargazers_count": 10,
+            "forks_count": 2,
+            "open_issues_count": 1,
             "license": {"spdx_id": "MIT"},
             "topics": ["example"],
             "homepage": "",
@@ -52,6 +57,45 @@ class ReadinessCheckTests(unittest.TestCase):
 
     def test_empty_check_list_has_zero_score(self) -> None:
         self.assertEqual(score([]), 0)
+
+
+class AutomationOutputTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.repository = {
+            "full_name": "octocat/Hello-World",
+            "html_url": "https://github.com/octocat/Hello-World",
+            "description": "A greeting",
+            "default_branch": "main",
+            "stargazers_count": 10,
+            "forks_count": 2,
+            "open_issues_count": 1,
+            "license": {"spdx_id": "MIT"},
+            "topics": ["example"],
+            "homepage": "",
+            "has_issues": True,
+            "archived": False,
+        }
+
+    def test_builds_json_report(self) -> None:
+        report = build_json_report(self.repository, evaluate(self.repository))
+
+        self.assertEqual(report["repository"], "octocat/Hello-World")
+        self.assertEqual(report["score"], 83)
+        self.assertEqual(len(report["checks"]), 6)
+
+    def test_fail_under_returns_nonzero(self) -> None:
+        from unittest.mock import patch
+
+        with patch("repo_readiness.cli.fetch_repository", return_value=self.repository):
+            with patch("builtins.print"):
+                self.assertEqual(
+                    main(["octocat/Hello-World", "--fail-under", "90"]),
+                    1,
+                )
+
+    def test_percentage_rejects_out_of_range_value(self) -> None:
+        with self.assertRaisesRegex(argparse.ArgumentTypeError, "0 to 100"):
+            percentage("101")
 
 
 if __name__ == "__main__":
