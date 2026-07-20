@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "repo-readiness"
+version = "0.1.0"
+description = "A dependency-free checkup for public GitHub repositories"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "zet-2" }]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+]
+
+[project.scripts]
+repo-readiness = "repo_readiness.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
